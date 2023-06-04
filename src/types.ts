@@ -8,14 +8,14 @@ export namespace Filter {
       size: z.number().int().min(1).max(50).default(30),
       offset: z.number().int().min(0).default(0),
     }).default({ size: 30, offset: 0 }),
+    targetLocation: z.object({
+      lat: z.number(),
+      lon: z.number(),
+    }).optional(),
     sort: z.object({
-      targetLocation: z.object({
-        lat: z.number(),
-        lon: z.number(),
-      }).optional(),
-      direction: z.enum(["asc", "desc"]).default("desc"),
+      direction: z.enum(["asc", "desc"]).default("asc").transform(v => v.toUpperCase()),
       sortBy: SortBy.default("oce_rank"),
-    }),
+    }).default({}),
     filter: z.object({
       professions: z.string().array(),
       distance: z.object({
@@ -23,6 +23,10 @@ export namespace Filter {
         max: z.number().min(0),
       }),
       oce: z.object({
+        min: z.number().min(0).max(100),
+        max: z.number().min(0).max(100),
+      }),
+      pupils: z.object({
         min: z.number().min(0).max(100),
         max: z.number().min(0).max(100),
       }),

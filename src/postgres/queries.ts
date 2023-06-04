@@ -151,13 +151,15 @@ const defaultQueries = [
     name TEXT,
     description TEXT,
     parent CHAR(10),
-    faculty_name TEXT,
-    faculty_nr CHAR(12)
+    faculty_nrs CHAR(12)[]
   )`,
 ];
 
 export const queries = {
-  filterDist: `SELECT 
+  filter: {
+    plain: {
+      sortDistance: `
+SELECT 
     *,
     ((point(g.lon, g.lat) <@> point(%6$L, %5$L)) * 1.609344) as distance,
     rank() over(order by oce_index.oce_index desc) as rank,
@@ -167,8 +169,17 @@ FROM oce_index
     LEFT JOIN geocache g on c.address = g.address
 WHERE study_year = '2021./2022.' AND g.lat != 0
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
-  filter: `SELECT 
-    *,
+
+      default: `
+SELECT
+    oce_index.municipality, oce_index.faculty_nr, oce_index.faculty_name,
+    oce_index.faculty_type, oce_index.faculty_type_alt, oce_index.subordinate,
+    oce_index.oce_index,
+    grade_12_pupils,
+    oce_math_weighted_average, oce_latvian_weighted_average, oce_foreign_weighted_average,
+    email, phone, director,
+    pupils_preschool_total, pupils_grades_1_12_total,
+    lat, lon, display_name as address,
     rank() over(order by oce_index.oce_index desc) as rank,
     count(*) over() as rankTotal
 FROM oce_index
@@ -176,11 +187,62 @@ FROM oce_index
     LEFT JOIN geocache g on c.address = g.address
 WHERE study_year = '2021./2022.' AND g.lat != 0
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
-  subFilters: {
-    professions: `ARRAY[professions.name] <@ ARRAY[%L]`,
-    distance: ``,
-    oce: ``,
-  }
+    },
+
+    filtered: {
+      base: `
+WITH ranked as (
+SELECT
+    oce_index.municipality, oce_index.faculty_nr, oce_index.faculty_name, 
+    oce_index.faculty_type, oce_index.faculty_type_alt, oce_index.subordinate, 
+    oce_index.oce_index,
+    grade_12_pupils,
+    oce_math_weighted_average, oce_latvian_weighted_average, oce_foreign_weighted_average,
+    email, phone, director,
+    pupils_preschool_total, pupils_grades_1_12_total,
+    lat, lon, display_name as address,
+    rank() over(order by oce_index.oce_index desc) as rank,
+    count(*) over() as rankTotal
+FROM oce_index
+    LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
+    LEFT JOIN geocache g on c.address = g.address
+WHERE study_year = '2021./2022.' AND g.lat != 0)
+SELECT * FROM ranked WHERE %5$s
+ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
+
+      baseDistance: `
+WITH ranked as (
+SELECT
+    oce_index.municipality, oce_index.faculty_nr, oce_index.faculty_name, 
+    oce_index.faculty_type, oce_index.faculty_type_alt, oce_index.subordinate, 
+    oce_index.oce_index,
+    grade_12_pupils,
+    oce_math_weighted_average, oce_latvian_weighted_average, oce_foreign_weighted_average,
+    email, phone, director,
+    pupils_preschool_total, pupils_grades_1_12_total,
+    lat, lon, display_name as address,
+    ((point(lon, lat) <@> point(%6$L, %5$L)) * 1.609344) as distance,
+    rank() over(order by oce_index.oce_index desc) as rank,
+    count(*) over() as rankTotal
+FROM oce_index
+    LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
+    LEFT JOIN geocache g on c.address = g.address
+WHERE study_year = '2021./2022.' AND g.lat != 0)
+SELECT * FROM ranked WHERE %7$s
+ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
+
+      professions: `
+faculty_nr IN (
+    SELECT DISTINCT unnest(faculty_nrs)
+    FROM professions 
+    WHERE ARRAY[professions.name] <@ ARRAY['Instruktori','Virsnieki']
+)`,
+
+      distance: `distance BETWEEN %L AND %L`,
+      oce: `oce_index BETWEEN %L AND %L`,
+      pupils: `grade_12_pupils BETWEEN %L AND %L`,
+    }
+  },
 };
 
 export default defaultQueries;

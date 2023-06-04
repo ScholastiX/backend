@@ -6,10 +6,17 @@ import { Filter } from "../types";
 import { expressApp } from "./client";
 import { CustomError } from "./error";
 
+const sortByMap = {
+  pupils: "grade_12_pupils",
+  oce_rank: "rank",
+  distance: "distance",
+} as const;
+
 async function filter(req: Request, res: Response) {
   const {
     pagination,
-    sort: { sortBy, targetLocation, direction },
+    targetLocation,
+    sort: { sortBy, direction },
     filter
   } = Filter.Input.parse(req.body || {});
 
@@ -19,12 +26,55 @@ async function filter(req: Request, res: Response) {
     }
   }
 
+  if (!filter) {
+    const { rows } = await postgresClient.query(format(
+          targetLocation ? queries.filter.plain.sortDistance : queries.filter.plain.default,
+          sortByMap[sortBy], direction,
+          pagination.offset, pagination.size,
+          ...(targetLocation ? [ targetLocation?.lat, targetLocation?.lon ] : []),
+    ));
+
+    return res.json(rows);
+  }
+
+  const { oce, pupils, professions, distance } = filter;
+
+  const filterQueries: string[] = [];
+
+  if (oce) {
+    filterQueries.push(format(queries.filter.filtered.oce, oce.min, oce.max));
+  }
+  if (pupils) {
+    filterQueries.push(format(queries.filter.filtered.pupils, pupils.min, pupils.max));
+  }
+  if (professions) {
+    filterQueries.push(format(queries.filter.filtered.professions, professions));
+  }
+  if (distance) {
+    filterQueries.push(format(queries.filter.filtered.distance, distance.min, distance.max));
+  }
+
+  if (filterQueries.length < 1) {
+    throw new CustomError(400, "Specify at least one filter!");
+  }
+
+  if (targetLocation) {
+    const { rows } = await postgresClient.query(format(
+          queries.filter.filtered.baseDistance,
+          sortByMap[sortBy], direction,
+          pagination.offset, pagination.size,
+          targetLocation.lat, targetLocation.lon,
+          filterQueries.join(" AND "),
+    ));
+
+    return res.json(rows);
+  }
+
   const { rows } = await postgresClient.query(format(
-        sortBy === "distance" ? queries.filterDist : queries.filter,
-        sortBy === "pupils" ? "grade_12_pupils" : (sortBy === "oce_rank" ? "rank" : "distance"),
-        direction,
+        queries.filter.filtered.base,
+        sortByMap[sortBy], direction,
         pagination.offset, pagination.size,
-        ...(sortBy === "distance" ? [ targetLocation?.lat, targetLocation?.lon ] : []),
+        filterQueries.join(" AND "),
   ));
 
   return res.json(rows);
