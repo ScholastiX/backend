@@ -139,6 +139,15 @@ const tableSheetHeaderToColumnMap = new Map<string, Map<string, string>>([
     [ "Bērnu skaits pirmsskolas programmās", "pupils_preschool_total" ],
     [ "Izglītojamo skaits 1. - 12. klasē", "pupils_grades_1_12_total" ],
   ])],
+  [ "professions", new Map([
+    [ "NPK", "number" ],
+    [ "Kods", "code" ],
+    [ "Nosaukums", "name" ],
+    [ "Apraksts", "description" ],
+    [ "Vecāks", "parent" ],
+    [ "Skola", "faculty_name" ],
+    [ "Reģistrācija", "faculty_nr" ],
+  ])],
 ]);
 
 async function main() {
@@ -249,6 +258,22 @@ WHERE geocache.address IS NULL`);
 
     await new Promise(res => setTimeout(res, 1200));
     counter++;
+  }
+
+  console.log("processing file", "profesiju-klasifikators-aktualizets-2022gada-8aprili.alt.xlsx");
+  const profWb = readFile(__dirname + "/../data/" + "profesiju-klasifikators-aktualizets-2022gada-8aprili.alt.xlsx");
+  const profSheet = profWb.Sheets[profWb.SheetNames[0]];
+  const profCsv = utils.sheet_to_json(profSheet);
+  const profMap = tableSheetHeaderToColumnMap.get("professions")!;
+
+  for (const row of profCsv) {
+    const entries = Object.entries(row!)
+          .map(([ k, v ]) => [ profMap.get(k), v ]);
+    const keys = entries.map(([ k ]) => k);
+    const values = entries.map(([ , v ]) => v);
+
+    const query = format("INSERT INTO professions (%I) VALUES (%L)", keys, values);
+    await client.query(query);
   }
 
   console.log("done!");

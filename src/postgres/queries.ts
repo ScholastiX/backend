@@ -141,7 +141,17 @@ const defaultQueries = [
     lat FLOAT NOT NULL,
     lon FLOAT NOT NULL,
     display_name TEXT
-  )`
+  )`,
+  `CREATE TABLE IF NOT EXISTS professions (
+    id SERIAL PRIMARY KEY NOT NULL,
+    number INTEGER,
+    code CHAR(10),
+    name TEXT,
+    description TEXT,
+    parent CHAR(10),
+    faculty_name TEXT,
+    faculty_nr CHAR(12)
+  )`,
 ];
 
 export const queries = {
