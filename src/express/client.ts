@@ -5,6 +5,7 @@ import registerError from "./error";
 import registerFilter from "./filter";
 import config from "../../config.json";
 import registerProfessions from "./professions";
+import registerSearch from "./search";
 
 export let expressApp: Express;
 let started = false;
@@ -27,6 +28,7 @@ export async function start() {
 
   registerFilter();
   registerProfessions();
+  registerSearch();
 
   registerError();
 

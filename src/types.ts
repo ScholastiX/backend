@@ -44,3 +44,7 @@ export namespace Profession {
     limit: z.number().min(1).max(100).default(15),
   });
 }
+
+export namespace Search {
+  export const SearchText = Profession.SearchText;
+}
