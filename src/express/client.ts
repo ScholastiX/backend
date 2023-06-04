@@ -4,6 +4,7 @@ import helmet from "helmet";
 import registerError from "./error";
 import registerFilter from "./filter";
 import config from "../../config.json";
+import registerProfessions from "./professions";
 
 export let expressApp: Express;
 let started = false;
@@ -25,6 +26,7 @@ export async function start() {
   expressApp.use(express.json());
 
   registerFilter();
+  registerProfessions();
 
   registerError();
 

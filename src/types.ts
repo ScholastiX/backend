@@ -15,6 +15,13 @@ export namespace Filter {
     direction: z.enum(["asc", "desc"]).default("desc"),
     sortBy: SortBy.default("oce_rank"),
   });
-  export type InputIn  = z.input<typeof Input>;
-  export type InputOut = z.output<typeof Input>;
+}
+
+export namespace Profession {
+  export const ListCount = z.number().min(0).max(500).default(100);
+
+  export const SearchText = z.object({
+    value: z.string().min(2),
+    limit: z.number().min(1).max(100).default(15),
+  });
 }

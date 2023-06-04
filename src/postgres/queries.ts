@@ -2,6 +2,8 @@
 const defaultQueries = [
   `CREATE EXTENSION IF NOT EXISTS cube;`,
   `CREATE EXTENSION IF NOT EXISTS earthdistance;`,
+  `CREATE EXTENSION IF NOT EXISTS pg_trgm;`,
+  `SET pg_trgm.similarity_threshold = 0.8;`,
   `CREATE TABLE IF NOT EXISTS prof_ed (
     id SERIAL PRIMARY KEY NOT NULL,
     municipality TEXT,
