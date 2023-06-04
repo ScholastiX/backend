@@ -159,15 +159,22 @@ export const queries = {
   filter: {
     plain: {
       sortDistance: `
-SELECT 
-    *,
+SELECT
+    oce_index.municipality, oce_index.faculty_nr, oce_index.faculty_name,
+    oce_index.faculty_type, oce_index.faculty_type_alt, oce_index.subordinate,
+    oce_index.oce_index,
+    grade_12_pupils,
+    oce_math_weighted_average, oce_latvian_weighted_average, oce_foreign_weighted_average,
+    email, phone, director,
+    pupils_preschool_total, pupils_grades_1_12_total,
+    lat, lon, display_name as address,
     ((point(g.lon, g.lat) <@> point(%6$L, %5$L)) * 1.609344) as distance,
     rank() over(order by oce_index.oce_index desc) as rank,
     count(*) over() as rankTotal
 FROM oce_index
     LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
     LEFT JOIN geocache g on c.address = g.address
-WHERE study_year = '2021./2022.' AND g.lat != 0
+WHERE study_year = '2021./2022.'
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
 
       default: `
@@ -206,7 +213,7 @@ SELECT
 FROM oce_index
     LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
     LEFT JOIN geocache g on c.address = g.address
-WHERE study_year = '2021./2022.' AND g.lat != 0)
+WHERE study_year = '2021./2022.')
 SELECT * FROM ranked WHERE %5$s
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
 
