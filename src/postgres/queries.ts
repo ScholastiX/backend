@@ -175,7 +175,12 @@ FROM oce_index
     LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
     LEFT JOIN geocache g on c.address = g.address
 WHERE study_year = '2021./2022.' AND g.lat != 0
-ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`
+ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
+  subFilters: {
+    professions: `ARRAY[professions.name] <@ ARRAY[%L]`,
+    distance: ``,
+    oce: ``,
+  }
 };
 
 export default defaultQueries;

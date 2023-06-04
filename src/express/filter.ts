@@ -7,7 +7,11 @@ import { expressApp } from "./client";
 import { CustomError } from "./error";
 
 async function filter(req: Request, res: Response) {
-  const { sortBy, targetLocation, pagination, direction } = Filter.Input.parse(req.body || {});
+  const {
+    pagination,
+    sort: { sortBy, targetLocation, direction },
+    filter
+  } = Filter.Input.parse(req.body || {});
 
   if (sortBy === "distance") {
     if (!targetLocation) {
@@ -17,7 +21,7 @@ async function filter(req: Request, res: Response) {
 
   const { rows } = await postgresClient.query(format(
         sortBy === "distance" ? queries.filterDist : queries.filter,
-        sortBy === "pupils" ? "grade_12_pupils" : sortBy,
+        sortBy === "pupils" ? "grade_12_pupils" : (sortBy === "oce_rank" ? "rank" : "distance"),
         direction,
         pagination.offset, pagination.size,
         ...(sortBy === "distance" ? [ targetLocation?.lat, targetLocation?.lon ] : []),
