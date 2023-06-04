@@ -36,12 +36,24 @@ export namespace Filter {
 
 export namespace Profession {
   export const ListCount = z.object({
-    count: z.number().min(0).max(500).default(100),
+    count: z.preprocess(
+          x => {
+            const processed = z.string().regex(/^\d+$/).transform(Number).safeParse(x);
+            return processed.success ? processed.data : x;
+          },
+          z.number().min(0).max(500).default(100),
+    ),
   });
 
   export const SearchText = z.object({
     value: z.string().min(2),
-    limit: z.number().min(1).max(100).default(15),
+    limit: z.preprocess(
+          x => {
+            const processed = z.string().regex(/^\d+$/).transform(Number).safeParse(x);
+            return processed.success ? processed.data : x;
+          },
+          z.number().min(1).max(100).default(15),
+    ),
   });
 }
 
