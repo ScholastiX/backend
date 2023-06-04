@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import queries from "./queries";
+import config from "../../config.json";
 
 export let client: Client;
 export let connected = false;
@@ -12,7 +13,7 @@ export async function connect() {
   client = new Client({
     user: "root",
     password: "root",
-    host: "localhost",
+    host: config.postgresHost,
     port: 5432,
     database: "root"
   });

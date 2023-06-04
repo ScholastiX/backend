@@ -3,6 +3,7 @@ import express, { Express } from "express";
 import helmet from "helmet";
 import registerError from "./error";
 import registerFilter from "./filter";
+import config from "../../config.json";
 
 export let expressApp: Express;
 let started = false;
@@ -27,7 +28,7 @@ export async function start() {
 
   registerError();
 
-  await new Promise<void>(resolve => expressApp.listen(2380, () => resolve()));
+  await new Promise<void>(resolve => expressApp.listen(config.expressPort, () => resolve()));
 
   started = true;
 }
