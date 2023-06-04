@@ -4,7 +4,7 @@ import { expressApp } from "./client";
 import type { Request, Response } from "express";
 
 async function professionList(req: Request, res: Response) {
-  const count = Profession.ListCount.parse(req.query.count);
+  const { count } = Profession.ListCount.parse(req.query);
 
   const { rows } = await postgresClient.query(
         `SELECT name, description FROM professions ORDER BY random() LIMIT $1`,

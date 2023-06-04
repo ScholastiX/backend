@@ -18,7 +18,9 @@ export namespace Filter {
 }
 
 export namespace Profession {
-  export const ListCount = z.number().min(0).max(500).default(100);
+  export const ListCount = z.object({
+    count: z.number().min(0).max(500).default(100),
+  });
 
   export const SearchText = z.object({
     value: z.string().min(2),
