@@ -174,7 +174,7 @@ SELECT
 FROM oce_index
     LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
     LEFT JOIN geocache g on c.address = g.address
-WHERE study_year = '2021./2022.'
+WHERE study_year = '2021./2022.' AND g.lat != 0
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
 
       default: `
@@ -192,7 +192,7 @@ SELECT
 FROM oce_index
     LEFT JOIN contacts c on oce_index.faculty_nr = c.faculty_nr
     LEFT JOIN geocache g on c.address = g.address
-WHERE study_year = '2021./2022.' AND g.lat != 0
+WHERE study_year = '2021./2022.'
 ORDER BY %1$I %2$s LIMIT %4$s OFFSET %3$s`,
     },
 
@@ -247,7 +247,7 @@ faculty_nr IN (
 
       distance: `distance BETWEEN %L AND %L`,
       oce: `oce_index BETWEEN %L AND %L`,
-      pupils: `grade_12_pupils BETWEEN %L AND %L`,
+      pupils: `pupils_grades_1_12_total BETWEEN %L AND %L`,
     }
   },
 };

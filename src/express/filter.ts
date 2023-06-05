@@ -7,7 +7,7 @@ import { expressApp } from "./client";
 import { CustomError } from "./error";
 
 const sortByMap = {
-  pupils: "grade_12_pupils",
+  pupils: "pupils_grades_1_12_total",
   oce_rank: "rank",
   distance: "distance",
 } as const;
@@ -20,7 +20,7 @@ async function filter(req: Request, res: Response) {
     filter
   } = Filter.Input.parse(req.body || {});
 
-  if (sortBy === "distance") {
+  if (sortBy === "distance" || filter?.distance) {
     if (!targetLocation) {
       throw new CustomError(400, "Specify targetLocation if sorting by distance!");
     }
@@ -47,7 +47,7 @@ async function filter(req: Request, res: Response) {
   if (pupils) {
     filterQueries.push(format(queries.filter.filtered.pupils, pupils.min, pupils.max));
   }
-  if (professions) {
+  if (professions && professions.length > 0) {
     filterQueries.push(format(queries.filter.filtered.professions, professions));
   }
   if (distance) {

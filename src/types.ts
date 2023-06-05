@@ -27,8 +27,8 @@ export namespace Filter {
         max: z.number().min(0).max(100),
       }),
       pupils: z.object({
-        min: z.number().min(0).max(100),
-        max: z.number().min(0).max(100),
+        min: z.number().min(0),
+        max: z.number().min(0),
       }),
     }).partial().optional()
   });
