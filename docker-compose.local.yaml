@@ -1,14 +1,5 @@
 
 services:
-  mongo:
-    image: mongo
-    restart: unless-stopped
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-
   postgres:
     image: postgres
     restart: unless-stopped
